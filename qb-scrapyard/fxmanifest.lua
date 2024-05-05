@@ -1,9 +1,9 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
-author 'Kakarot'
-description 'Allows players to scrap cars for money'
-version '1.2.0'
+author 'Noted'
+description 'Allows players to chop cars'
+version '0.8.4'
 
 shared_script {
     '@PolyZone/client.lua',
