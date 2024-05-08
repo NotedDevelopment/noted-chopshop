@@ -29,7 +29,22 @@ local function LoadAnimDict(dict)
     end
 end
 
-local function DrawText3Ds(x, y, z, text, id)
+local DrawText3Ds = function(x, y, z, text)
+    local onScreen, _x, _y = World3dToScreen2d(x, y, z)
+    local px, py, pz = table.unpack(GetGameplayCamCoords())
+    
+    SetTextScale(0.35, 0.35)
+    SetTextFont(4)
+    SetTextProportional(1)
+    SetTextColour(255, 255, 255, 215)
+    SetTextEntry("STRING")
+    SetTextCentre(1)
+    AddTextComponentString(text)
+    DrawText(_x, _y)
+    local factor = (string.len(text)) / 370
+    DrawRect(_x, _y+0.015, 0.015+ factor, 0.03, 41, 11, 41, 68)
+end
+--[[ local function DrawText3Ds(x, y, z, text, id)
     local textEntity = {}
     textEntity.x = x
     textEntity.y = y
@@ -51,16 +66,16 @@ local function DrawText3Ds(x, y, z, text, id)
     ClearDrawOrigin()
 
     table.insert(textEntities, textEntity) -- Store the text entity
-end
+end ]]
 
-local function DeleteText3Ds(id)
+--[[ local function DeleteText3Ds(id)
     for i, activeText in ipairs(textEntities) do
         if activeText.id == id then
             table.remove(textEntities, i)  -- Remove the text from the activeTexts table
             break  -- Exit the loop after deleting the text
         end
     end
-end
+end ]]
 
 function ChopListFinished()
     if next(CurrentVehicles) ~= nil then
@@ -69,7 +84,7 @@ function ChopListFinished()
     doz:destroy()
     RemoveBlip(blip)
     listed = false
-    -- reward mechanism
+    -- add reward mechanism here
 end
 
 function CreateDropOffZone()
@@ -101,8 +116,8 @@ function CreateDropOffZone()
         if isPointInside then
             CreateThread(function()
                 while isInsidePolyzone and IsPedInAnyVehicle(ped, false) do
-                    DrawText3Ds(dropOffZone.x, dropOffZone.y-1, dropOffZone.z, "Press [E] to chop vehicle", "echop")
-                    Wait(0)
+                    DrawText3Ds(dropOffZone.x, dropOffZone.y-1, dropOffZone.z, "Press [E] to chop vehicle")
+                    Wait(8)
                     if IsPedInAnyVehicle(ped) then
                         if IsControlJustPressed(0, 38) then
                             ScrapVehicle()
@@ -114,7 +129,7 @@ function CreateDropOffZone()
         else
             Citizen.Wait(2000)
             isInsidePolyzone = false
-            DeleteText3Ds("echop")
+            --[[ DeleteText3Ds("echop") ]]
         end
     end)
 end
@@ -208,16 +223,21 @@ end
 
 
 
-local IsPlayerNearCoords = function(x, y, z)
+local IsPlayerNearCoords = function(x, y, z, range)
     local playerx, playery, playerz = table.unpack(GetEntityCoords(PlayerPedId(), false))
     local dist = Vdist(playerx, playery, playerz, x, y, z)
-    return dist < 1.5
+    return dist < range
 end
 
 function ScrapVehicle()
     local ped = PlayerPedId()
     local vehicle = GetVehiclePedIsIn(ped, true)
     local isIdle = true
+
+    if not QBCore.Functions.HasItem("chopcard", 1) then
+        QBCore.Functions.Notify("You need your choplist to chop cars", "error")
+        return
+    end
     
     if vehicle ~= 0 and vehicle ~= nil then
         if GetPedInVehicleSeat(vehicle, -1) == ped then
@@ -239,12 +259,22 @@ function ScrapVehicle()
                                 CreateThread(function()
                                     print("threads plus 1 = ", threads)
                                     local coords = GetWorldPositionOfEntityBone(vehicle, GetEntityBoneIndexByName(vehicle, partInfo.bone))
+                                    local range
+                                    if partInfo.bone == 'boot' or partInfo.bone == 'bonnet' then
+                                        range = 1.5
+                                    else
+                                        range = 1
+                                    end
                                     while true do
-                                        Wait(0)
-                                        DrawText3Ds(coords.x, coords.y, coords.z, "Press [~g~E~w~] to chop ".. partInfo.text, partInfo.bone)
-                                        if IsPlayerNearCoords(coords.x, coords.y, coords.z) and IsControlJustReleased(1, 38) and isIdle then
-                                            isIdle = false
-                                            break
+                                        if IsPlayerNearCoords(coords.x, coords.y, coords.z, range) then
+                                            Wait(8)
+                                            DrawText3Ds(coords.x, coords.y, coords.z, "Press [~g~E~w~] to chop ".. partInfo.text)
+                                            if IsPlayerNearCoords(coords.x, coords.y, coords.z, range) and IsControlJustReleased(1, 38) and isIdle then
+                                                isIdle = false
+                                                break
+                                            end
+                                        else
+                                            Wait(500)
                                         end
                                     end
                                     SetVehicleDoorOpen(vehicle, partInfo.part, false, false)
@@ -257,7 +287,7 @@ function ScrapVehicle()
                                     else
                                         TaskStartScenarioInPlace(ped, 'WORLD_HUMAN_WELDING', 0, true)
                                     end
-                                    DeleteText3Ds(partInfo.bone)
+                                    --[[ DeleteText3Ds(partInfo.bone) ]]
                                     QBCore.Functions.Progressbar("scrap_part", Lang:t('text.demolish_vehicle'), ScrapTime, false, true, {
                                         disableMovement = true,
                                         disableCarMovement = true,

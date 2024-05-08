@@ -42,9 +42,9 @@ RegisterNetEvent('qb-scrapyard:server:getSmallRewards', function()
     local itemAmount = 0
     while total > 0 do
         itemIndex = math.random(1, #Config.SmallRewardsTable)
-        itemAmount = math.random(Config.SmallRewardsTable[total].min, Config.SmallRewardsTable[total].max)
-        Player.Functions.AddItem(Config.SmallRewardsTable[total].itemName, itemAmount)
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[Config.SmallRewardsTable[total].itemName], 'add', itemAmount)
+        itemAmount = math.random(Config.SmallRewardsTable[itemIndex].min, Config.SmallRewardsTable[itemIndex].max)
+        Player.Functions.AddItem(Config.SmallRewardsTable[itemIndex].itemName, itemAmount)
+        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[Config.SmallRewardsTable[itemIndex].itemName], 'add', itemAmount)
         total = total - 1
     end
 end)
@@ -68,9 +68,9 @@ RegisterNetEvent('qb-scrapyard:server:getBigRewards', function()
     local itemAmount = 0
     while total > 0 do
         itemIndex = math.random(1, #Config.BigRewardsTable)
-        itemAmount = math.random(Config.BigRewardsTable[total].min, Config.BigRewardsTable[total].max)
-        Player.Functions.AddItem(Config.BigRewardsTable[total].itemName, itemAmount)
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[Config.BigRewardsTable[total].itemName], 'add', itemAmount)
+        itemAmount = math.random(Config.BigRewardsTable[itemIndex].min, Config.BigRewardsTable[itemIndex].max)
+        Player.Functions.AddItem(Config.BigRewardsTable[itemIndex].itemName, itemAmount)
+        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[Config.BigRewardsTable[itemIndex].itemName], 'add', itemAmount)
         total = total - 1
     end
 end)
